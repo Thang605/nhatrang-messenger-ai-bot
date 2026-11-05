@@ -1,7 +1,6 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const url = require('url');
 const { generateAIResponse, loadCatalog } = require('./ai_engine');
 
 const PORT = process.env.PORT || 3000;
@@ -12,6 +11,7 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
 
 const LEADS_FILE = path.join(__dirname, 'leads.json');
 const CATALOG_FILE = path.join(__dirname, 'catalog.json');
+const DASHBOARD_FILE = path.join(__dirname, 'public', 'index.html');
 
 // In-memory session map keyed by sender PSID
 const sessions = new Map();
@@ -126,7 +126,7 @@ function parseJsonBody(req) {
 }
 
 const server = http.createServer(async (req, res) => {
-  const parsedUrl = url.parse(req.url, true);
+  const parsedUrl = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
   const pathname = parsedUrl.pathname;
 
   // Enable CORS for local simulator / dashboard
@@ -140,9 +140,9 @@ const server = http.createServer(async (req, res) => {
 
   // 1. Facebook Webhook Verification (GET /webhook)
   if (pathname === '/webhook' && req.method === 'GET') {
-    const mode = parsedUrl.query['hub.mode'];
-    const token = parsedUrl.query['hub.verify_token'];
-    const challenge = parsedUrl.query['hub.challenge'];
+    const mode = parsedUrl.searchParams.get('hub.mode');
+    const token = parsedUrl.searchParams.get('hub.verify_token');
+    const challenge = parsedUrl.searchParams.get('hub.challenge');
 
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
       console.log('✅ Facebook Webhook verified successfully!');
@@ -230,10 +230,47 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // 4. Leads API (GET /api/leads)
+  // 4. Leads API with Search & Filter (GET /api/leads?q=...&hasPhone=1&service=...)
   if (pathname === '/api/leads' && req.method === 'GET') {
+    const q = (parsedUrl.searchParams.get('q') || '').trim().toLowerCase();
+    const hasPhone = parsedUrl.searchParams.get('hasPhone');
+    const serviceFilter = (parsedUrl.searchParams.get('service') || '').trim().toLowerCase();
+
+    let leads = readLeads();
+    if (hasPhone === '1' || hasPhone === 'true') {
+      leads = leads.filter(l => Boolean(l.phone));
+    }
+    if (serviceFilter) {
+      leads = leads.filter(l =>
+        (l.interests || []).some(i => i.toLowerCase().includes(serviceFilter))
+      );
+    }
+    if (q) {
+      leads = leads.filter(l => {
+        const haystack = [
+          l.senderId,
+          l.phone,
+          l.flightCode,
+          l.travelDate,
+          l.pickupTime,
+          ...(l.interests || []),
+          l.lastMessage
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return haystack.includes(q);
+      });
+    }
+
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    return res.end(JSON.stringify(readLeads()));
+    return res.end(JSON.stringify(leads));
+  }
+
+  // 4b. Privacy Policy page for Meta App Live Mode (GET /privacy)
+  if (pathname === '/privacy' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(`<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><title>Chính sách quyền riêng tư - Xe & Tour Du Lịch Nha Trang</title></head><body style="font-family:sans-serif;max-width:720px;margin:40px auto;line-height:1.6;padding:0 16px;"><h1>Chính sách quyền riêng tư (Privacy Policy)</h1><p>Ứng dụng <strong>Nha Trang Xe Tour AI Bot</strong> hỗ trợ tư vấn tự động dịch vụ xe hợp đồng 4-7-16 chỗ đưa đón sân bay Cam Ranh và Tour đảo Nha Trang trên trang Facebook Fanpage <strong>Xe & Tour Du Lịch Nha Trang</strong>.</p><h2>1. Dữ liệu thu thập</h2><p>Chúng tôi chỉ ghi nhận các thông tin do khách hàng chủ động cung cấp trong cuộc trò chuyện Messenger (Số điện thoại liên hệ, Mã chuyến bay, Ngày giờ đón, Số lượng hành khách và nhu cầu dịch vụ) nhằm mục đích điều phối xe và xác nhận đặt dịch vụ.</p><h2>2. Sử dụng & Bảo mật dữ liệu</h2><p>Thông tin khách hàng chỉ được sử dụng nội bộ bởi bộ phận điều hành xe/tour Nha Trang (Hotline/Zalo: 0382.883.456) và tuyệt đối không chia sẻ hay bán cho bên thứ ba.</p><h2>3. Yêu cầu xóa dữ liệu</h2><p>Khách hàng có thể yêu cầu xóa toàn bộ dữ liệu liên hệ bất cứ lúc nào bằng cách nhắn tin trực tiếp lên Fanpage hoặc liên hệ Hotline/Zalo: <strong>0382.883.456</strong>.</p></body></html>`);
   }
 
   // 5. Catalog API (GET / PUT /api/catalog)
@@ -254,13 +291,24 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // Healthcheck
+  // 6. Web Dashboard & Simulator UI (GET /) when requested by browser
+  if (pathname === '/' && req.method === 'GET' && parsedUrl.searchParams.get('format') !== 'json') {
+    const accept = req.headers.accept || '';
+    if (accept.includes('text/html') && fs.existsSync(DASHBOARD_FILE)) {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(fs.readFileSync(DASHBOARD_FILE, 'utf8'));
+    }
+  }
+
+  // 7. Healthcheck JSON (GET /health or GET /?format=json or non-HTML client)
   res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(
     JSON.stringify({
       service: 'Nha Trang Car (<=16 seats) & Tour AI Messenger Webhook',
       status: 'running',
-      webhookEndpoint: '/webhook'
+      webhookEndpoint: '/webhook',
+      hasPageAccessToken: Boolean(PAGE_ACCESS_TOKEN),
+      hasGeminiKey: Boolean(process.env.GEMINI_API_KEY)
     })
   );
 });
