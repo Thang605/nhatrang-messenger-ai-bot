@@ -43,12 +43,12 @@ function extractCustomerInfo(text, existingSession = {}) {
   }
 
   // 3. Extract passenger count (e.g. "6 người", "8 khách", "nhà mình 10 người")
-  const paxMatch = text.match(/(\d{1,2})\s*(người|khách|ng|pax|vé|chỗ)/i);
+  // Strip out "xe 4 chỗ / xe 7 chỗ / xe 16 chỗ" first so vehicle specs aren't mistaken for pax count
+  const textWithoutCarSpec = text.replace(/xe\s*(?:du\s*lịch\s*)?\d{1,2}\s*chỗ/gi, '');
+  const paxMatch = textWithoutCarSpec.match(/(\d{1,2})\s*(người|khách|ng|pax|vé|chỗ)/i);
   if (paxMatch) {
     const num = parseInt(paxMatch[1], 10);
-    // Avoid confusing "xe 7 chỗ" or "xe 16 chỗ" with passenger count if preceded by "xe"
-    const isCarSpec = /xe\s*\d{1,2}\s*chỗ/i.test(text);
-    if (!isCarSpec && num >= 1 && num <= 45) {
+    if (num >= 1 && num <= 45) {
       updated.paxCount = num;
     }
   }
