@@ -1,0 +1,12 @@
+{
+  "name": "nhatrang-messenger-ai-bot",
+  "version": "1.0.0",
+  "description": "Trợ lý AI Chatbot Facebook Messenger cho dịch vụ Xe 4-7-16 chỗ & Vé Tour Nha Trang",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

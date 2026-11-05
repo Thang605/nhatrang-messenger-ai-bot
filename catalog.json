@@ -1,0 +1,98 @@
+{
+  "brandName": "Nha Trang Travel & Car 16s",
+  "hotline": "0382.883.456",
+  "comboDiscountPercent": 5,
+  "comboFlatDiscountVnd": 50000,
+  "cars": [
+    {
+      "id": "cam_ranh_1way",
+      "route": "Đưa/Đón Sân bay Cam Ranh ⇄ Trung tâm Nha Trang (1 chiều)",
+      "prices": {
+        "4_cho": 250000,
+        "7_cho": 300000,
+        "16_cho": 550000
+      },
+      "note": "Trọn gói phí sân bay, cầu đường. Đón tận sảnh theo mã chuyến bay, chờ miễn phí nếu delay."
+    },
+    {
+      "id": "cam_ranh_2way",
+      "route": "Khứ hồi Sân bay Cam Ranh ⇄ Nha Trang (2 chiều)",
+      "prices": {
+        "4_cho": 480000,
+        "7_cho": 580000,
+        "16_cho": 1050000
+      },
+      "note": "Tiết kiệm hơn đặt lẻ từng chiều, bao gồm toàn bộ phí bến bãi."
+    },
+    {
+      "id": "city_tour_half",
+      "route": "City Tour Nha Trang nửa ngày (4 tiếng: Viện Hải Dương Học, Chùa Long Sơn, Tháp Bà, Nhà Thờ Đá)",
+      "prices": {
+        "4_cho": 500000,
+        "7_cho": 600000,
+        "16_cho": 900000
+      },
+      "note": "Xe riêng đưa đón tại khách sạn, chủ động thời gian."
+    },
+    {
+      "id": "city_tour_full",
+      "route": "City Tour Nha Trang nguyên ngày (8 tiếng)",
+      "prices": {
+        "4_cho": 800000,
+        "7_cho": 950000,
+        "16_cho": 1350000
+      },
+      "note": "Tài xế địa phương kiêm hướng dẫn viên ẩm thực & chụp ảnh."
+    },
+    {
+      "id": "vinh_hy_day",
+      "route": "Tuyến Vĩnh Hy - Hang Rái - Đồng Cừu - Vườn Nho (Trong ngày)",
+      "prices": {
+        "4_cho": 1100000,
+        "7_cho": 1300000,
+        "16_cho": 1800000
+      },
+      "note": "Cung đường biển đẹp nhất Việt Nam, dừng chụp ảnh theo yêu cầu."
+    },
+    {
+      "id": "da_lat_1way",
+      "route": "Nha Trang ⇄ Đà Lạt (1 chiều hoặc đi về trong ngày)",
+      "prices": {
+        "4_cho": 1200000,
+        "7_cho": 1400000,
+        "16_cho": 2200000
+      },
+      "note": "Tài xế chuyên tuyến đèo Khánh Lê an toàn, êm ái, không say xe."
+    }
+  ],
+  "tours": [
+    {
+      "id": "tour_3_dao_vip",
+      "name": "Tour 3 Đảo VIP Cano (Bãi Tranh / Vịnh San Hô - Làng Chài - Hòn Tằm Tắm Bùn)",
+      "adultPrice": 750000,
+      "childPrice": 520000,
+      "includes": "Xe đưa đón khách sạn, cano cao tốc, ăn trưa hải sản 9 món, vé tắm bùn Hòn Tằm, HDV suốt tuyến"
+    },
+    {
+      "id": "vinwonders_nt",
+      "name": "Vé VinWonders Nha Trang (Cáp treo 2 chiều + Vui chơi trọn gói + Tata Show)",
+      "adultPrice": 950000,
+      "childPrice": 710000,
+      "includes": "Xuất vé QR Code vào cổng ngay không cần xếp hàng, bao gồm cáp treo vượt biển 2 chiều"
+    },
+    {
+      "id": "hon_tam_seamud",
+      "name": "Vé Hòn Tằm Tắm Bùn (Gói Seamud + Cano 2 chiều + Ăn trưa Buffet)",
+      "adultPrice": 640000,
+      "childPrice": 450000,
+      "includes": "Cano cao tốc khứ hồi, ngâm bùn khoáng nóng, hồ bơi vô cực, ôn tuyền thủy liệu pháp, buffet trưa"
+    },
+    {
+      "id": "dao_khi_suoi_hoa_lan",
+      "name": "Tour Đảo Khỉ - Suối Hoa Lan (Vịnh Nha Phu)",
+      "adultPrice": 620000,
+      "childPrice": 430000,
+      "includes": "Xe đưa đón, tàu qua đảo, vé tham quan xiếc khỉ, tắm biển An Bình, ăn trưa nhà hàng"
+    }
+  ]
+}
