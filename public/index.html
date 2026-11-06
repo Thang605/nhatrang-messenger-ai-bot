@@ -38,6 +38,69 @@
     @media (max-width: 960px) {
       .container { grid-template-columns: 1fr; }
     }
+    @media (max-width: 768px) {
+      body { padding: 12px; padding-bottom: 74px; }
+      .glass { padding: 16px; border-radius: 14px; }
+      .hero-banner { height: clamp(110px, 28vw, 150px); aspect-ratio: 16 / 7; }
+      .hero-body { padding: 14px 16px; gap: 12px; }
+      .brand-row { gap: 12px; width: 100%; align-items: flex-start; }
+      .brand-logo { width: 60px; height: 60px; border-width: 2.5px; margin-top: 2px; }
+      .sub { font-size: 12px; line-height: 1.4; }
+      .stats-row { grid-template-columns: 1fr; }
+      .chat-box { height: 520px; }
+      .hero-actions { width: 100%; justify-content: flex-start; }
+      .mobile-sticky-bar {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid var(--border);
+        padding: 8px 12px max(8px, env(safe-area-inset-bottom));
+        gap: 8px;
+        box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.45);
+      }
+      .sticky-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 10px 8px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: transform 0.1s ease;
+      }
+      .sticky-btn:active {
+        transform: scale(0.97);
+      }
+      .sticky-btn.call {
+        background: #22c55e;
+        color: #ffffff;
+      }
+      .sticky-btn.zalo {
+        background: #0284c7;
+        color: #ffffff;
+      }
+      .sticky-btn.bot {
+        background: linear-gradient(135deg, #0ea5e9, #6366f1);
+        color: #ffffff;
+      }
+    }
+    @media (max-width: 480px) {
+      body { padding: 8px; padding-bottom: 74px; }
+      .hero-banner { height: clamp(100px, 26vw, 130px); }
+      .brand-logo { width: 52px; height: 52px; border-width: 2px; margin-top: 2px; }
+      .btn { padding: 7px 11px; font-size: 12px; }
+    }
     .glass {
       background: var(--card);
       backdrop-filter: blur(16px);
@@ -54,13 +117,14 @@
     }
     .hero-banner {
       width: 100%;
-      height: 210px;
+      height: clamp(140px, 22vw, 220px);
+      aspect-ratio: 16 / 5;
       object-fit: cover;
       display: block;
-      filter: brightness(0.88);
+      filter: brightness(0.9);
     }
     .hero-body {
-      padding: 16px 22px 18px;
+      padding: 18px 24px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -68,16 +132,23 @@
       gap: 16px;
       position: relative;
       z-index: 2;
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.98));
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.99));
     }
     .brand-row {
       display: flex;
       align-items: center;
       gap: 16px;
+      min-width: 0;
+      flex: 1;
+    }
+    .brand-info {
+      min-width: 0;
+      flex: 1;
     }
     .brand-logo {
       width: 76px;
       height: 76px;
+      aspect-ratio: 1 / 1;
       border-radius: 50%;
       object-fit: cover;
       border: 3px solid #38bdf8;
@@ -87,6 +158,9 @@
       z-index: 3;
       flex-shrink: 0;
       background: #0f172a;
+    }
+    .mobile-sticky-bar {
+      display: none;
     }
     .badge {
       display: inline-flex;
@@ -108,7 +182,7 @@
       background: #22c55e;
       box-shadow: 0 0 10px #22c55e;
     }
-    h1 { font-size: 21px; font-weight: 700; }
+    h1 { font-size: clamp(15px, 2.2vw, 21px); font-weight: 700; line-height: 1.35; margin: 0; }
     h2 { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--accent); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
     .stats-row {
@@ -333,16 +407,18 @@
       <div class="hero-body">
         <div class="brand-row">
           <img class="brand-logo" src="/logo.png" alt="Logo Xe & Tour Nha Trang" />
-          <div>
+          <div class="brand-info">
             <h1>🚖 Xe & Tour Du Lịch Nha Trang — Trung Tâm Quản Lý Khách Hàng & AI Bot</h1>
             <div class="sub">Xe Hợp Đồng 4-7-16 Chỗ Sân Bay Cam Ranh & Tour Đảo VIP • Hotline/Zalo: 0382.883.456</div>
           </div>
         </div>
-        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <a class="btn" href="/logo.png" target="_blank">🖼️ Xem Logo</a>
-          <a class="btn" href="/banner.png" target="_blank">🏞️ Xem Ảnh Bìa</a>
-          <a class="btn" href="https://www.facebook.com/profile.php?id=61596003072965" target="_blank">🌐 Mở Fanpage Facebook</a>
-          <span class="badge"><span class="dot"></span> Bot Messenger Đang Hoạt Động</span>
+        <div class="hero-actions" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <a class="btn" href="https://zalo.me/0382883456" target="_blank" style="background:rgba(56,189,248,0.22); color:#38bdf8; border:1px solid rgba(56,189,248,0.45);">💬 Zalo: 0382.883.456</a>
+          <a class="btn" href="tel:0382883456" style="background:rgba(34,197,94,0.22); color:#4ade80; border:1px solid rgba(34,197,94,0.45);">📞 Gọi Hotline</a>
+          <a class="btn" href="https://www.facebook.com/profile.php?id=61596003072965" target="_blank">🌐 Fanpage Facebook</a>
+          <a class="btn" href="/logo.png" target="_blank">🖼️ Logo</a>
+          <a class="btn" href="/banner.png" target="_blank">🏞️ Ảnh Bìa</a>
+          <span class="badge"><span class="dot"></span> Bot Messenger Sẵn Sàng 24/7</span>
         </div>
       </div>
     </div>
@@ -407,6 +483,52 @@
         <input id="msgInput" type="text" placeholder="Nhập thử: Đón chuyến VJ128 lúc 15h cho 4 người, sđt 0912345678..." autocomplete="off" />
         <button type="submit" class="primary">Gửi</button>
       </form>
+    </div>
+
+    <!-- PHẦN MỚI: BẢNG GIÁ DỊCH VỤ, CẨM NANG KINH NGHIỆM THỰC TẾ & LỊCH TRÌNH 3N2Đ NHA TRANG -->
+    <div class="glass" style="grid-column: 1 / -1;">
+      <h2>
+        <span>🌴 Bảng Giá Trọn Gói & Cẩm Nang Kinh Nghiệm Du Lịch Nha Trang Thực Tế</span>
+        <a class="btn" href="https://zalo.me/0382883456" target="_blank">💬 Tư Vấn & Đặt Xe Zalo: 0382.883.456</a>
+      </h2>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap:14px; margin-top:10px;">
+        <div class="stat-card" style="line-height:1.6;">
+          <div style="font-weight:700; color:#38bdf8; font-size:15px; margin-bottom:6px;">💰 1. Kinh Nghiệm Dự Trù Chi Phí & Bảng Giá</div>
+          <div style="font-size:13px; color:#e2e8f0;">
+            • <strong>Xe 4 chỗ Sân bay Cam Ranh ⇄ Nha Trang:</strong> 250.000đ/chiều (rẻ hơn 30% so với bắt taxi đồng hồ 380k–450k).<br/>
+            • <strong>Xe 7 chỗ Sân bay:</strong> 300.000đ/chiều • <strong>Xe 16 chỗ:</strong> 550.000đ/chiều (trọn gói phí cầu đường, sân bay).<br/>
+            • <strong>Cano Tour 3 Đảo VIP:</strong> 650.000đ/người lớn (gồm Cano cao tốc, ăn trưa hải sản 8 món, tắm bùn Hòn Tằm).<br/>
+            • <strong>Mẹo tiết kiệm:</strong> Đặt <em>Combo Xe Sân Bay + Tour Đảo</em> được giảm ngay <strong>50.000đ</strong>; khi ăn hải sản tươi sống nhớ hỏi kỹ giá theo kg trước khi chế biến.
+          </div>
+        </div>
+
+        <div class="stat-card" style="line-height:1.6;">
+          <div style="font-weight:700; color:#4ade80; font-size:15px; margin-bottom:6px;">🚖 2. Lưu Ý Về Xe Cộ & Phương Tiện Đi Lại</div>
+          <div style="font-size:13px; color:#e2e8f0;">
+            • <strong>Từ Sân bay Cam Ranh về trung tâm (35km):</strong> Đi qua cung đường biển đèo Cù Hin tuyệt đẹp (khoảng 40 phút). Chỉ cần báo trước <strong>Mã chuyến bay (VD: VJ128, VN1340)</strong>, tài xế sẽ tự canh giờ hạ cánh đón tận cửa ga đến — kể cả delay không phụ thu.<br/>
+            • <strong>Di chuyển ra đảo:</strong> Nên đi <strong>Cano cao tốc</strong> (chỉ 12–15 phút ra Hòn Mun/Hòn Tằm) thay vì tàu gỗ để êm ái, không say sóng.<br/>
+            • <strong>Đi gia đình có trẻ nhỏ/người lớn tuổi:</strong> Nên thuê xe riêng 4–7–16 chỗ theo buổi/ngày (từ 500.000đ) có máy lạnh mát mẻ, chủ động lịch trình.
+          </div>
+        </div>
+
+        <div class="stat-card" style="line-height:1.6;">
+          <div style="font-weight:700; color:#facc15; font-size:15px; margin-bottom:6px;">👗 3. Chuẩn Bị Trang Phục & Đồ Dùng Cần Thiết</div>
+          <div style="font-size:13px; color:#e2e8f0;">
+            • <strong>Đi Cano 3 Đảo & Tắm bùn Hòn Tằm:</strong> Chuẩn bị 2 bộ đồ bơi/bikini, váy maxi hoặc sơ mi sáng màu chụp hình trên cano, dép sandal/giày đi biển chống trượt, túi chống nước đựng điện thoại.<br/>
+            • <strong>Đi Tháp Bà Ponagar & Chùa Long Sơn:</strong> Chọn trang phục lịch sự, quần hoặc váy dài qua đầu gối, áo có tay.<br/>
+            • <strong>Đi VinWonders Nha Trang:</strong> Mang giày thể thao hoặc dép êm chân để đi bộ tham quan và mang sẵn đồ bơi cho công viên nước & vịnh phao nổi.
+          </div>
+        </div>
+
+        <div class="stat-card" style="line-height:1.6;">
+          <div style="font-weight:700; color:#f472b6; font-size:15px; margin-bottom:6px;">🗺️ 4. Gợi Ý Lịch Trình 3 Ngày 2 Đêm Chuẩn Bản Địa</div>
+          <div style="font-size:13px; color:#e2e8f0;">
+            • <strong>Ngày 1:</strong> Đón Sân bay Cam Ranh ngắm đèo Cù Hin → Nhận phòng → Chiều tham quan Tháp Bà Ponagar, Nhà thờ Đá → Tối thưởng thức Hải sản Bờ Kè & dạo Quảng trường 2/4.<br/>
+            • <strong>Ngày 2:</strong> 08h00 Xe đón đi <strong>Tour 3 Đảo VIP Cano</strong>: Lặn ngắm san hô Hòn Mun → Ăn trưa Làng Chài → Tắm bùn khoáng nóng & hồ bơi vô cực Hòn Tằm.<br/>
+            • <strong>Ngày 3:</strong> Trải nghiệm Cáp treo vượt biển <strong>VinWonders</strong> (hoặc Viện Hải Dương Học & Chợ Đầm mua đặc sản) → Xe hợp đồng tiễn ra Sân bay Cam Ranh.
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -588,10 +710,34 @@
       sendChat(document.getElementById('msgInput').value);
     };
 
+    function focusChat() {
+      const input = document.getElementById('msgInput');
+      if (input) {
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        input.focus();
+      }
+    }
+
     // Initial load & auto-refresh every 10s
     loadLeads();
     setInterval(loadLeads, 10000);
     sendChat('Xin chào');
   </script>
+
+  <!-- THANH NÚT BÁM DÍNH ĐÁY MÀN HÌNH TRÊN DI ĐỘNG (STICKY ACTION BAR) -->
+  <div class="mobile-sticky-bar">
+    <a class="sticky-btn call" href="tel:0382883456">
+      <span>📞</span>
+      <span>Gọi Hotline</span>
+    </a>
+    <a class="sticky-btn zalo" href="https://zalo.me/0382883456" target="_blank">
+      <span>💬</span>
+      <span>Chat Zalo</span>
+    </a>
+    <button type="button" class="sticky-btn bot" onclick="focusChat()">
+      <span>🤖</span>
+      <span>Hỏi Giá AI</span>
+    </button>
+  </div>
 </body>
 </html>
