@@ -5,6 +5,12 @@ const { generateAIResponse, loadCatalog } = require('./ai_engine');
 let brandAssets = { LOGO_BASE64: '', BANNER_BASE64: '' };
 try {
   brandAssets = require('./assets');
+  if (brandAssets.LOGO_BASE64) {
+    brandAssets.LOGO_BASE64 = brandAssets.LOGO_BASE64.replace(
+      'wDrn21bUJGIOoXYbcAMTtgj',
+      'wDrrn21bUJGIOoXYbcAMTtgj'
+    );
+  }
 } catch (_) {}
 
 const PORT = process.env.PORT || 3000;
@@ -156,59 +162,6 @@ function parseJsonBody(req) {
     });
   });
 }
-
-const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0284c7"/>
-      <stop offset="55%" stop-color="#0369a1"/>
-      <stop offset="100%" stop-color="#0f172a"/>
-    </linearGradient>
-    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#fde047"/>
-      <stop offset="100%" stop-color="#f97316"/>
-    </linearGradient>
-  </defs>
-  <circle cx="200" cy="200" r="192" fill="url(#bg)" stroke="#38bdf8" stroke-width="10"/>
-  <circle cx="200" cy="135" r="58" fill="url(#sun)" opacity="0.92"/>
-  <path d="M40 235 Q120 205 200 230 T360 225 L360 360 L40 360 Z" fill="#0ea5e9" opacity="0.45"/>
-  <path d="M105 225 L145 180 L255 180 L295 225 L325 232 L325 268 L75 268 L75 232 Z" fill="#ffffff"/>
-  <path d="M125 220 L152 190 L248 190 L275 220 Z" fill="#0f172a"/>
-  <circle cx="130" cy="268" r="24" fill="#0f172a" stroke="#38bdf8" stroke-width="6"/>
-  <circle cx="270" cy="268" r="24" fill="#0f172a" stroke="#38bdf8" stroke-width="6"/>
-  <text x="200" y="322" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="900" fill="#ffffff" text-anchor="middle">XE &amp; TOUR</text>
-  <text x="200" y="352" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" fill="#fde047" text-anchor="middle">NHA TRANG</text>
-</svg>`;
-
-const BANNER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420">
-  <defs>
-    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0f172a"/>
-      <stop offset="50%" stop-color="#0369a1"/>
-      <stop offset="100%" stop-color="#0ea5e9"/>
-    </linearGradient>
-    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#fde047"/>
-      <stop offset="100%" stop-color="#fb923c"/>
-    </linearGradient>
-  </defs>
-  <rect width="1200" height="420" fill="url(#sky)"/>
-  <circle cx="980" cy="110" r="75" fill="url(#gold)" opacity="0.85"/>
-  <path d="M0 290 Q300 240 600 285 T1200 270 L1200 420 L0 420 Z" fill="#0284c7" opacity="0.55"/>
-  <path d="M0 330 Q400 290 800 335 T1200 320 L1200 420 L0 420 Z" fill="#0f172a" opacity="0.85"/>
-  <g transform="translate(760, 185)">
-    <rect x="20" y="45" width="340" height="85" rx="22" fill="#ffffff"/>
-    <path d="M65 48 L115 8 L285 8 L330 48 Z" fill="#e2e8f0"/>
-    <path d="M80 44 L120 15 L275 15 L312 44 Z" fill="#0f172a"/>
-    <circle cx="95" cy="130" r="28" fill="#0f172a" stroke="#38bdf8" stroke-width="7"/>
-    <circle cx="290" cy="130" r="28" fill="#0f172a" stroke="#38bdf8" stroke-width="7"/>
-  </g>
-  <text x="60" y="110" font-family="Segoe UI, Arial, sans-serif" font-size="44" font-weight="900" fill="#ffffff">XE &amp; TOUR DU LỊCH NHA TRANG</text>
-  <text x="60" y="165" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700" fill="#fde047">🚖 Xe Hợp Đồng 4 - 7 - 16 Chỗ Đón Tiễn Sân Bay Cam Ranh</text>
-  <text x="60" y="212" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="600" fill="#e0f2fe">🏝️ Cano Tour 3 Đảo VIP • Hòn Tằm • VinWonders • City Tour</text>
-  <rect x="60" y="245" width="470" height="58" rx="29" fill="#22c55e"/>
-  <text x="295" y="283" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="900" fill="#052e16" text-anchor="middle">📞 HOTLINE / ZALO: 0382.883.456</text>
-</svg>`;
 
 const server = http.createServer(async (req, res) => {
   const parsedUrl = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
@@ -383,7 +336,7 @@ const server = http.createServer(async (req, res) => {
 
   // 6. Static Assets in /public (logo.png, banner.png, logo.jpg, banner.jpg)
   if (
-    req.method === 'GET' &&
+    (req.method === 'GET' || req.method === 'HEAD') &&
     (pathname === '/logo.png' ||
       pathname === '/logo.jpg' ||
       pathname === '/banner.png' ||
@@ -395,44 +348,45 @@ const server = http.createServer(async (req, res) => {
     const jpgPath = path.join(__dirname, 'public', isLogo ? 'logo.jpg' : 'banner.jpg');
     const pngPath = path.join(__dirname, 'public', isLogo ? 'logo.png' : 'banner.png');
     if (fs.existsSync(jpgPath)) {
+      const buf = fs.readFileSync(jpgPath);
       res.writeHead(200, {
         'Content-Type': 'image/jpeg',
+        'Content-Length': buf.length,
         'Cache-Control': 'public, max-age=3600'
       });
-      return res.end(fs.readFileSync(jpgPath));
+      return res.end(req.method === 'HEAD' ? undefined : buf);
     }
     if (fs.existsSync(pngPath)) {
+      const buf = fs.readFileSync(pngPath);
       res.writeHead(200, {
         'Content-Type': 'image/png',
+        'Content-Length': buf.length,
         'Cache-Control': 'public, max-age=3600'
       });
-      return res.end(fs.readFileSync(pngPath));
+      return res.end(req.method === 'HEAD' ? undefined : buf);
     }
     const b64 = isLogo ? brandAssets.LOGO_BASE64 : brandAssets.BANNER_BASE64;
     if (b64) {
+      const buf = Buffer.from(b64, 'base64');
       res.writeHead(200, {
         'Content-Type': 'image/jpeg',
+        'Content-Length': buf.length,
         'Cache-Control': 'public, max-age=3600'
       });
-      return res.end(Buffer.from(b64, 'base64'));
+      return res.end(req.method === 'HEAD' ? undefined : buf);
     }
-    res.writeHead(200, {
-      'Content-Type': 'image/svg+xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600'
-    });
-    return res.end(isLogo ? LOGO_SVG : BANNER_SVG);
   }
 
-  // 6b. Serve server.js for automated sync
-  if (req.method === 'GET' && pathname === '/server.js') {
+  // 6b. Serve server.js and ai_engine.js for automated sync
+  if (req.method === 'GET' && (pathname === '/server.js' || pathname === '/ai_engine.js')) {
+    const targetFile = pathname === '/server.js' ? 'server.js' : 'ai_engine.js';
     res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-    return res.end(fs.readFileSync(path.join(__dirname, 'server.js'), 'utf8'));
+    return res.end(fs.readFileSync(path.join(__dirname, targetFile), 'utf8'));
   }
 
-  // 7. Web Dashboard & Simulator UI (GET /) when requested by browser
+  // 7. Web Dashboard & Simulator UI (GET /) when requested by browser or social crawler
   if (pathname === '/' && req.method === 'GET' && parsedUrl.searchParams.get('format') !== 'json') {
-    const accept = req.headers.accept || '';
-    if (accept.includes('text/html') && fs.existsSync(DASHBOARD_FILE)) {
+    if (fs.existsSync(DASHBOARD_FILE)) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       return res.end(fs.readFileSync(DASHBOARD_FILE, 'utf8'));
     }
@@ -446,6 +400,7 @@ const server = http.createServer(async (req, res) => {
       status: 'running',
       webhookEndpoint: '/webhook',
       hasPageAccessToken: Boolean(PAGE_ACCESS_TOKEN),
+      hasDeepSeekKey: Boolean(process.env.DEEPSEEK_API_KEY),
       hasGeminiKey: Boolean(process.env.GEMINI_API_KEY)
     })
   );
