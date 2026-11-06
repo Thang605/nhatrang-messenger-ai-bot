@@ -1,6 +1,22 @@
 const fs = require('fs');
 const path = require('path');
 
+const ENV_PATH = path.join(__dirname, '.env');
+if (fs.existsSync(ENV_PATH)) {
+  for (const line of fs.readFileSync(ENV_PATH, 'utf8').split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eqIdx = trimmed.indexOf('=');
+    if (eqIdx > 0) {
+      const key = trimmed.slice(0, eqIdx).trim();
+      const val = trimmed.slice(eqIdx + 1).trim().replace(/^['"]|['"]$/g, '');
+      if (key && process.env[key] === undefined) {
+        process.env[key] = val;
+      }
+    }
+  }
+}
+
 const CATALOG_PATH = path.join(__dirname, 'catalog.json');
 
 function loadCatalog() {
@@ -30,10 +46,10 @@ function recommendVehicle(paxCount) {
 function extractCustomerInfo(text, existingSession = {}) {
   const updated = { ...existingSession };
 
-  // 1. Extract Vietnamese phone number
-  const phoneMatch = text.match(/(?:\+84|0)(?:3|5|7|8|9)\d{8}\b/);
+  // 1. Extract Vietnamese phone number (supports contiguous or dot/space/hyphen-separated digits)
+  const phoneMatch = text.match(/(?:\+84|0)[\s.\-]?(?:3|5|7|8|9)(?:[\s.\-]?\d){8}\b/);
   if (phoneMatch) {
-    updated.phone = phoneMatch[0];
+    updated.phone = phoneMatch[0].replace(/[\s.\-]/g, '').replace(/^\+84/, '0');
   }
 
   // 2. Extract Flight Code (VN, VJ, QH, BL, VU + 3-4 digits)
@@ -54,14 +70,14 @@ function extractCustomerInfo(text, existingSession = {}) {
   }
 
   // 4. Extract date / time hints
-  const dateMatch = text.match(/\b(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?|ngày mai|hôm nay|cuối tuần|thứ\s*\d)\b/i);
+  const dateMatch = text.match(/(?:^|[\s,.;(])(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?|ngày mai|hôm nay|ngày kia|cuối tuần|thứ\s*[2-7]|chủ nhật)(?=$|[\s,.;!?)])/i);
   if (dateMatch) {
-    updated.travelDate = dateMatch[0];
+    updated.travelDate = dateMatch[1].trim();
   }
 
-  const timeMatch = text.match(/\b(\d{1,2}\s*(?:h|giờ|:)\s*\d{0,2}\s*(?:sáng|chiều|tối)?)\b/i);
+  const timeMatch = text.match(/\b(\d{1,2}(?:\s*(?:h|:)\s*\d{1,2}|\s*(?:h|giờ)(?:\s+\d{1,2}\s*phút)?)(?:\s*(?:sáng|trưa|chiều|tối|đêm))?)(?=$|[\s,.;!?)])/i);
   if (timeMatch) {
-    updated.pickupTime = timeMatch[0];
+    updated.pickupTime = timeMatch[1].trim().replace(/\s+/g, ' ');
   }
 
   // 5. Detect service interests
@@ -129,7 +145,7 @@ async function generateAIResponse(userText, session = {}) {
         const replyText = data?.choices?.[0]?.message?.content;
         if (replyText) {
           return {
-            reply: replyText.trim(),
+            reply: replyText.replace(/\*\*/g, '').trim(),
             quickReplies: getSuggestedQuickReplies(userText, updatedSession),
             session: updatedSession,
             provider: 'deepseek'
@@ -162,9 +178,10 @@ async function generateAIResponse(userText, session = {}) {
         const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (replyText) {
           return {
-            reply: replyText.trim(),
+            reply: replyText.replace(/\*\*/g, '').trim(),
             quickReplies: getSuggestedQuickReplies(userText, updatedSession),
-            session: updatedSession
+            session: updatedSession,
+            provider: 'gemini'
           };
         }
       }
@@ -178,7 +195,8 @@ async function generateAIResponse(userText, session = {}) {
   return {
     reply,
     quickReplies: getSuggestedQuickReplies(userText, updatedSession),
-    session: updatedSession
+    session: updatedSession,
+    provider: 'rules'
   };
 }
 
@@ -191,7 +209,7 @@ Thông tin khách hàng đã thu thập được trong hội thoại:
 ${JSON.stringify(session, null, 2)}
 
 Nguyên tắc trả lời trên Facebook Messenger:
-1. Thân thiện, nhiệt tình như người bản địa Nha Trang, ngắn gọn, dễ đọc trên điện thoại (dùng gạch đầu dòng và emoji hợp lý).
+1. Thân thiện, nhiệt tình như người bản địa Nha Trang, ngắn gọn, dễ đọc trên điện thoại (dùng gạch đầu dòng • và emoji hợp lý, KHÔNG dùng ký tự Markdown ** hoặc #).
 2. Nếu khách hỏi số lượng người (từ 1-16 người), tự động gợi ý dòng xe phù hợp (1-3 khách: 4 chỗ; 4-5 khách có hành lý: 7 chỗ; 6-15 khách: 16 chỗ) và báo giá chính xác từ bảng giá.
 3. Luôn khéo léo giới thiệu ưu đãi COMBO: Đặt xe sân bay/xe riêng kèm Vé Tour (3 đảo VIP, VinWonders, Hòn Tằm) được giảm ngay ${formatVND(catalog.comboFlatDiscountVnd)}/chuyến xe.
 4. Để chốt đơn, luôn hỏi xin: Số điện thoại/Zalo, Ngày giờ đón, Mã chuyến bay (nếu đón sân bay Cam Ranh) và Số lượng khách.`;
@@ -203,7 +221,7 @@ function buildSmartRuleReply(userText, catalog, session) {
   const recCar = recommendVehicle(pax || 4);
 
   // Case 1: Customer provides phone number -> Confirm booking immediately!
-  if (/(?:\+84|0)(?:3|5|7|8|9)\d{8}\b/.test(userText)) {
+  if (/(?:\+84|0)[\s.\-]?(?:3|5|7|8|9)(?:[\s.\-]?\d){8}\b/.test(userText)) {
     return (
       `✅ Dạ em đã ghi nhận thông tin đặt dịch vụ của anh/chị:\n` +
       `• 📞 SĐT/Zalo: ${session.phone}\n` +
@@ -253,7 +271,7 @@ function buildSmartRuleReply(userText, catalog, session) {
 
     let specificNotice = '';
     if (pax) {
-      specificNotice = `\n💡 Với đoàn ${pax} người, anh/chị đi **${recCar.label}** là thoải mái nhất (Giá đón sân bay chỉ **${formatVND(camRanh1.prices[recCar.key])}/chiều**).\n`;
+      specificNotice = `\n💡 Với đoàn ${pax} người, anh/chị đi ${recCar.label} là thoải mái nhất (Giá đón sân bay chỉ ${formatVND(camRanh1.prices[recCar.key])}/chiều).\n`;
     }
 
     return (
@@ -267,7 +285,7 @@ function buildSmartRuleReply(userText, catalog, session) {
       `• City Tour Nha Trang (8 tiếng): 4C ${formatVND(cityFull.prices['4_cho'])} | 7C ${formatVND(cityFull.prices['7_cho'])} | 16C ${formatVND(cityFull.prices['16_cho'])}\n` +
       `• Vĩnh Hy - Hang Rái - Đồng Cừu: 4C ${formatVND(vinhHy.prices['4_cho'])} | 7C ${formatVND(vinhHy.prices['7_cho'])} | 16C ${formatVND(vinhHy.prices['16_cho'])}\n\n` +
       `🎁 Đặc biệt: Giảm ngay ${formatVND(catalog.comboFlatDiscountVnd)} tiền xe khi mua kèm vé VinWonders hoặc Tour Đảo!\n` +
-      `Anh/chị cho em xin **Số lượng người + Mã chuyến bay (hoặc giờ đón) + SĐT Zalo** để em xếp xe đón tận sảnh nhé!`
+      `Anh/chị cho em xin Số lượng người + Mã chuyến bay (hoặc giờ đón) + SĐT Zalo để em xếp xe đón tận sảnh nhé!`
     );
   }
 
@@ -304,12 +322,12 @@ function buildSmartRuleReply(userText, catalog, session) {
 
   // Default welcome & menu
   return (
-    `👋 Chào anh/chị! Em là Trợ lý AI của **${catalog.brandName}**.\n` +
+    `👋 Chào anh/chị! Em là Trợ lý AI của ${catalog.brandName}.\n` +
     `Bên em chuyên phục vụ:\n` +
-    `🚖 **Xe riêng 4 - 7 - 16 chỗ đời mới:** Đưa đón Sân bay Cam Ranh (chỉ từ 250k), City Tour, Vĩnh Hy - Hang Rái, Đà Lạt.\n` +
-    `🏝️ **Vé Tour Nha Trang giá đại lý:** Tour 3 Đảo VIP Cano, Vé VinWonders QR Code, Tắm bùn Hòn Tằm, Đảo Khỉ.\n` +
-    `🎁 **Ưu đãi Combo:** Giảm ngay ${formatVND(catalog.comboFlatDiscountVnd)} khi đặt Xe kèm Vé Tour!\n\n` +
-    `Anh/chị đang cần **báo giá xe**, **mua vé tour** hay muốn em **gợi ý lịch trình theo số người** của đoàn mình ạ?`
+    `🚖 Xe riêng 4 - 7 - 16 chỗ đời mới: Đưa đón Sân bay Cam Ranh (chỉ từ 250k), City Tour, Vĩnh Hy - Hang Rái, Đà Lạt.\n` +
+    `🏝️ Vé Tour Nha Trang giá đại lý: Tour 3 Đảo VIP Cano, Vé VinWonders QR Code, Tắm bùn Hòn Tằm, Đảo Khỉ.\n` +
+    `🎁 Ưu đãi Combo: Giảm ngay ${formatVND(catalog.comboFlatDiscountVnd)} khi đặt Xe kèm Vé Tour!\n\n` +
+    `Anh/chị đang cần báo giá xe, mua vé tour hay muốn em gợi ý lịch trình theo số người của đoàn mình ạ?`
   );
 }
 

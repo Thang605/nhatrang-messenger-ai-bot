@@ -1,6 +1,23 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+
+const ENV_FILE = path.join(__dirname, '.env');
+if (fs.existsSync(ENV_FILE)) {
+  for (const line of fs.readFileSync(ENV_FILE, 'utf8').split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eqIdx = trimmed.indexOf('=');
+    if (eqIdx > 0) {
+      const key = trimmed.slice(0, eqIdx).trim();
+      const val = trimmed.slice(eqIdx + 1).trim().replace(/^['"]|['"]$/g, '');
+      if (key && process.env[key] === undefined) {
+        process.env[key] = val;
+      }
+    }
+  }
+}
+
 const { generateAIResponse, loadCatalog } = require('./ai_engine');
 let brandAssets = { LOGO_BASE64: '', BANNER_BASE64: '' };
 try {
@@ -342,7 +359,9 @@ const server = http.createServer(async (req, res) => {
       pathname === '/banner.png' ||
       pathname === '/banner.jpg' ||
       pathname === '/public/logo.png' ||
-      pathname === '/public/banner.png')
+      pathname === '/public/logo.jpg' ||
+      pathname === '/public/banner.png' ||
+      pathname === '/public/banner.jpg')
   ) {
     const isLogo = pathname.includes('logo');
     const jpgPath = path.join(__dirname, 'public', isLogo ? 'logo.jpg' : 'banner.jpg');
