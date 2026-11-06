@@ -94,13 +94,54 @@ function extractCustomerInfo(text, existingSession = {}) {
 }
 
 /**
- * Generates a response using Gemini API if GEMINI_API_KEY is configured,
+ * Generates a response using DeepSeek API (DEEPSEEK_API_KEY) or Gemini API (GEMINI_API_KEY) if configured,
  * or falls back to the built-in smart Nha Trang consultant rule engine.
  */
 async function generateAIResponse(userText, session = {}) {
   const catalog = loadCatalog();
   const updatedSession = extractCustomerInfo(userText, session);
 
+  // 1. DeepSeek API (OpenAI-compatible endpoint: https://api.deepseek.com/chat/completions)
+  if (process.env.DEEPSEEK_API_KEY) {
+    try {
+      const systemInstruction = buildSystemPrompt(catalog, updatedSession);
+      const res = await fetch(
+        process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: process.env.DEEPSEEK_MODEL || 'deepseek-chat',
+            messages: [
+              { role: 'system', content: systemInstruction },
+              { role: 'user', content: userText }
+            ],
+            temperature: 0.4,
+            max_tokens: 600
+          })
+        }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const replyText = data?.choices?.[0]?.message?.content;
+        if (replyText) {
+          return {
+            reply: replyText.trim(),
+            quickReplies: getSuggestedQuickReplies(userText, updatedSession),
+            session: updatedSession,
+            provider: 'deepseek'
+          };
+        }
+      }
+    } catch (err) {
+      console.error('DeepSeek API error, falling back:', err.message);
+    }
+  }
+
+  // 2. Gemini API
   if (process.env.GEMINI_API_KEY) {
     try {
       const systemInstruction = buildSystemPrompt(catalog, updatedSession);
