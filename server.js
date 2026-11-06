@@ -364,9 +364,21 @@ const server = http.createServer(async (req, res) => {
       pathname === '/public/banner.jpg')
   ) {
     const isLogo = pathname.includes('logo');
-    const jpgPath = path.join(__dirname, 'public', isLogo ? 'logo.jpg' : 'banner.jpg');
+    const wantsPng = pathname.endsWith('.png');
     const pngPath = path.join(__dirname, 'public', isLogo ? 'logo.png' : 'banner.png');
-    if (fs.existsSync(jpgPath)) {
+    const jpgPath = path.join(__dirname, 'public', isLogo ? 'logo.jpg' : 'banner.jpg');
+
+    if (wantsPng && fs.existsSync(pngPath)) {
+      const buf = fs.readFileSync(pngPath);
+      res.writeHead(200, {
+        'Content-Type': 'image/png',
+        'Content-Length': buf.length,
+        'Cache-Control': 'public, max-age=3600'
+      });
+      return res.end(req.method === 'HEAD' ? undefined : buf);
+    }
+
+    if (!wantsPng && fs.existsSync(jpgPath)) {
       const buf = fs.readFileSync(jpgPath);
       res.writeHead(200, {
         'Content-Type': 'image/jpeg',
@@ -375,6 +387,8 @@ const server = http.createServer(async (req, res) => {
       });
       return res.end(req.method === 'HEAD' ? undefined : buf);
     }
+
+    // Fallback to whichever file format exists
     if (fs.existsSync(pngPath)) {
       const buf = fs.readFileSync(pngPath);
       res.writeHead(200, {
@@ -384,11 +398,37 @@ const server = http.createServer(async (req, res) => {
       });
       return res.end(req.method === 'HEAD' ? undefined : buf);
     }
+    if (fs.existsSync(jpgPath)) {
+      const buf = fs.readFileSync(jpgPath);
+      res.writeHead(200, {
+        'Content-Type': 'image/jpeg',
+        'Content-Length': buf.length,
+        'Cache-Control': 'public, max-age=3600'
+      });
+      return res.end(req.method === 'HEAD' ? undefined : buf);
+    }
+
     const b64 = isLogo ? brandAssets.LOGO_BASE64 : brandAssets.BANNER_BASE64;
     if (b64) {
       const buf = Buffer.from(b64, 'base64');
       res.writeHead(200, {
         'Content-Type': 'image/jpeg',
+        'Content-Length': buf.length,
+        'Cache-Control': 'public, max-age=3600'
+      });
+      return res.end(req.method === 'HEAD' ? undefined : buf);
+    }
+  }
+
+  // 6a. Serve additional distinct travel photos in /public (tour_cano.jpg, airport_car.jpg, city_ponagar.jpg)
+  if ((req.method === 'GET' || req.method === 'HEAD') && /^\/(public\/)?[a-zA-Z0-9_-]+\.(jpg|jpeg|png)$/i.test(pathname)) {
+    const fileName = path.basename(pathname);
+    const filePath = path.join(__dirname, 'public', fileName);
+    if (fs.existsSync(filePath)) {
+      const buf = fs.readFileSync(filePath);
+      const mime = fileName.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+      res.writeHead(200, {
+        'Content-Type': mime,
         'Content-Length': buf.length,
         'Cache-Control': 'public, max-age=3600'
       });
