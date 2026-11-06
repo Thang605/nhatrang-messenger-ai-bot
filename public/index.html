@@ -4,11 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Xe & Tour Du Lịch Nha Trang — Quản Lý Khách Hàng & AI Messenger</title>
+  <link rel="icon" type="image/png" href="/logo.png" />
   <style>
     :root {
       --bg: #0b1120;
-      --card: rgba(30, 41, 59, 0.75);
-      --border: rgba(148, 163, 184, 0.18);
+      --card: rgba(30, 41, 59, 0.78);
+      --border: rgba(148, 163, 184, 0.2);
       --accent: #38bdf8;
       --accent2: #22c55e;
       --text: #f8fafc;
@@ -40,13 +41,42 @@
       padding: 20px;
       box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
     }
-    .header {
+    .hero-card {
       grid-column: 1 / -1;
+      padding: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .hero-banner {
+      width: 100%;
+      height: 210px;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.88);
+    }
+    .hero-body {
+      padding: 16px 22px 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 16px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.96));
+    }
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-logo {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #38bdf8;
+      box-shadow: 0 8px 25px rgba(56, 189, 248, 0.35);
+      margin-top: -42px;
+      background: #0f172a;
     }
     .badge {
       display: inline-flex;
@@ -198,19 +228,50 @@
       flex-direction: column;
       height: 620px;
     }
+    .chat-header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .chat-header-brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--accent);
+    }
     .messages {
       flex: 1;
       overflow-y: auto;
       padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       background: rgba(15, 23, 42, 0.55);
       border-radius: 12px;
       border: 1px solid var(--border);
     }
+    .msg-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .msg-row.user {
+      justify-content: flex-end;
+    }
+    .bot-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid var(--accent);
+      flex-shrink: 0;
+    }
     .msg {
-      max-width: 88%;
+      max-width: 84%;
       padding: 10px 13px;
       border-radius: 14px;
       font-size: 13.5px;
@@ -218,14 +279,20 @@
       white-space: pre-wrap;
     }
     .msg.bot {
-      align-self: flex-start;
       background: rgba(51, 65, 85, 0.85);
       border-bottom-left-radius: 4px;
     }
     .msg.user {
-      align-self: flex-end;
       background: linear-gradient(135deg, #0284c7, #2563eb);
       border-bottom-right-radius: 4px;
+    }
+    .msg-banner {
+      width: 100%;
+      max-height: 120px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      display: block;
     }
     .quick-replies {
       display: flex;
@@ -251,14 +318,22 @@
 </head>
 <body>
   <div class="container">
-    <div class="glass header">
-      <div>
-        <h1>🚖 Xe & Tour Du Lịch Nha Trang — Trung Tâm Tìm Kiếm & Quản Lý Khách Hàng</h1>
-        <div class="sub">Tự động thu thập SĐT, Chuyến bay, Lịch trình từ Facebook Messenger • Hotline/Zalo: 0382.883.456</div>
-      </div>
-      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-        <a class="btn" href="https://www.facebook.com/profile.php?id=61596003072965" target="_blank">🌐 Mở Fanpage Facebook</a>
-        <span class="badge"><span class="dot"></span> Bot Messenger Đang Hoạt Động</span>
+    <div class="glass hero-card">
+      <img class="hero-banner" src="/banner.png" alt="Xe & Tour Du Lịch Nha Trang Banner" />
+      <div class="hero-body">
+        <div class="brand-row">
+          <img class="brand-logo" src="/logo.png" alt="Logo Xe & Tour Nha Trang" />
+          <div>
+            <h1>🚖 Xe & Tour Du Lịch Nha Trang — Trung Tâm Quản Lý Khách Hàng & AI Bot</h1>
+            <div class="sub">Xe Hợp Đồng 4-7-16 Chỗ Sân Bay Cam Ranh & Tour Đảo VIP • Hotline/Zalo: 0382.883.456</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <a class="btn" href="/logo.png" target="_blank">🖼️ Xem Logo</a>
+          <a class="btn" href="/banner.png" target="_blank">🏞️ Xem Ảnh Bìa</a>
+          <a class="btn" href="https://www.facebook.com/profile.php?id=61596003072965" target="_blank">🌐 Mở Fanpage Facebook</a>
+          <span class="badge"><span class="dot"></span> Bot Messenger Đang Hoạt Động</span>
+        </div>
       </div>
     </div>
 
@@ -309,7 +384,13 @@
 
     <!-- CỘT PHẢI: KHUNG CHAT GIẢ LẬP & TEST NHANH -->
     <div class="glass chat-box">
-      <h2>💬 Test Nhanh Bot & Tạo Thử Lead Khách Hàng</h2>
+      <div class="chat-header-brand">
+        <img src="/logo.png" alt="Bot Avatar" />
+        <div>
+          <div style="font-weight:700; font-size:15px; color:#38bdf8;">Trợ Lý AI — Xe & Tour Nha Trang</div>
+          <div class="sub" style="margin-top:1px;">Trực tuyến 24/7 • Tự động báo giá & giữ xe</div>
+        </div>
+      </div>
       <div id="messages" class="messages"></div>
       <div id="quickReplies" class="quick-replies"></div>
       <form id="chatForm" class="input-row">
@@ -328,6 +409,7 @@
 
     let allLeads = [];
     let currentFilter = 'all';
+    let firstBotMessage = true;
 
     function setFilter(filterName, btnEl) {
       currentFilter = filterName;
@@ -432,10 +514,35 @@
     }
 
     function appendMessage(text, role) {
+      const row = document.createElement('div');
+      row.className = 'msg-row ' + role;
+
+      if (role === 'bot') {
+        const avatar = document.createElement('img');
+        avatar.className = 'bot-avatar';
+        avatar.src = '/logo.png';
+        avatar.alt = 'Bot';
+        row.appendChild(avatar);
+      }
+
       const div = document.createElement('div');
       div.className = 'msg ' + role;
-      div.textContent = text;
-      messagesEl.appendChild(div);
+
+      if (role === 'bot' && firstBotMessage) {
+        firstBotMessage = false;
+        const banner = document.createElement('img');
+        banner.className = 'msg-banner';
+        banner.src = '/banner.png';
+        banner.alt = 'Nha Trang Xe & Tour';
+        div.appendChild(banner);
+      }
+
+      const span = document.createElement('span');
+      span.textContent = text;
+      div.appendChild(span);
+
+      row.appendChild(div);
+      messagesEl.appendChild(row);
       messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
